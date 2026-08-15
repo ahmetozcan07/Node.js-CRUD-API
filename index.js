@@ -73,25 +73,24 @@ app.get('/tasks/:id', (req, res) => {
 });
 
 // POST ENDPOINT =====================================================================================
-// POST /tasks)
+// POST /tasks
 app.post('/tasks', (req, res) => {
   const { title } = req.body;
 
-  //  400 Bad Request
   if (!title || title.trim() === "") {
     return res.status(400).json({ error: "Title is required" });
   }
 
-  const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
-  const newTask = {
-    id: newId,
-    title: title,
-    done: false
-  };
+  const insert = db.prepare('INSERT INTO tasks (title, done) VALUES (?, ?)');
+  const result = insert.run(title.trim(), 0);
 
-  // 201 Created
-  tasks.push(newTask);
-  res.status(201).json(newTask);
+  const newTask = db.prepare('SELECT * FROM tasks WHERE id = ?').get(result.lastInsertRowid);
+
+  res.status(201).json({
+    id: newTask.id,
+    title: newTask.title,
+    done: Boolean(newTask.done)
+  });
 });
 // PUT ENDPOINT =====================================================================================
 // PUT /tasks/:id
