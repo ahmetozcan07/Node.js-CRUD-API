@@ -38,3 +38,14 @@ Keep-Alive: timeout=5
 
 ## Swagger screenshot
 ![](./SwaggerScreenshot.png)
+
+## Why SQLite was choosen?
+- Everything lives in a local file (`tasks.db`).
+- No separate database server to install or configure.
+- Data survives server restarts, turning the app from a temporary demo into a real backend.
+
+## Database in DBBrowser
+![](./tasksTable.png)
+
+## Example SQL Query
+![](./DBBrowserSS.png)
