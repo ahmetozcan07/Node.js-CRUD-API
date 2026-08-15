@@ -1,4 +1,6 @@
 const express = require('express');
+const Database = require('better-sqlite3');
+
 const app = express();
 const port = 3000;
 
@@ -9,6 +11,24 @@ app.use(express.json());
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiDocument));
 
+const db = new Database('tasks.db');
+
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    done INTEGER NOT NULL DEFAULT 0
+  )
+`).run();
+
+// seed if table is empty
+const rowCount = db.prepare('SELECT COUNT(*) as count FROM tasks').get().count;
+if (rowCount === 0) {
+  const insert = db.prepare('INSERT INTO tasks (title, done) VALUES (?, ?)');
+  insert.run('Learn Node.js', 1);
+  insert.run('Build a CRUD API', 0);
+  insert.run('Test with Swagger', 0);
+}
 
 
 // Root Endpoint
