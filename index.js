@@ -96,41 +96,42 @@ app.post('/tasks', (req, res) => {
 // PUT /tasks/:id
 app.put('/tasks/:id', (req, res) => {
   const taskId = parseInt(req.params.id);
-  const taskIndex = tasks.findIndex(t => t.id === taskId);
+  const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(taskId);
 
-  // 404 Not Found
-  if (taskIndex === -1) {
-    return res.status(404).json({ error: `Task ${taskId} not found` });
+  if (!task) {
+    return res.status(404).json({ error: "Task not found" });
   }
 
   const { title, done } = req.body;
 
-  // 400 Invalid body
   if (Object.keys(req.body).length === 0 || (title !== undefined && title.trim() === "")) {
     return res.status(400).json({ error: "Invalid or empty body" });
   }
 
-  if (title !== undefined) tasks[taskIndex].title = title;
-  if (done !== undefined) tasks[taskIndex].done = done;
+  const updatedTitle = title !== undefined ? title.trim() : task.title;
+  const updatedDone = done !== undefined ? (done ? 1 : 0) : task.done;
 
-  res.json(tasks[taskIndex]);
+  db.prepare('UPDATE tasks SET title = ?, done = ? WHERE id = ?').run(updatedTitle, updatedDone, taskId);
+
+  const updatedTask = db.prepare('SELECT * FROM tasks WHERE id = ?').get(taskId);
+  res.json({ ...updatedTask, done: Boolean(updatedTask.done) });
 });
 
 // DELETE ENDPOINT =====================================================================================
 app.delete('/tasks/:id', (req, res) => {
   const taskId = parseInt(req.params.id);
-  const taskIndex = tasks.findIndex(t => t.id === taskId);
+  const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(taskId);
 
-  // 404 Not Found
-  if (taskIndex === -1) {
-    return res.status(404).json({ error: `Task ${taskId} not found` });
+  if (!task) {
+    return res.status(404).json({ error: "Task not found" });
   }
 
-  tasks.splice(taskIndex, 1);
+  db.prepare('DELETE FROM tasks WHERE id = ?').run(taskId);
 
-  // 204 No Content or empty body [cite: 1]
   res.status(204).send();
 });
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
