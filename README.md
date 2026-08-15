@@ -10,6 +10,7 @@ Use these commands to run this project:
 npm install
 node index.js
 ```
+## Table of Endpoints
 
 | Task           | HTTP method     | Endpoint       |
 |:---------------|:----------------|:---------------|
