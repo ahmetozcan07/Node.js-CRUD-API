@@ -9,6 +9,7 @@ Use these commands to run this project:
 ```bash
 npm install
 node index.js
+```
 
 | Task           | HTTP method     | Endpoint       |
 |:---------------|:----------------|:---------------|
