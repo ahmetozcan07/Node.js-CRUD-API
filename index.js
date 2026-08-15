@@ -43,7 +43,7 @@ app.get('/tasks/:id', (req, res) => {
   }
 });
 
-// POST ENDPOINTS =====================================================================================
+// POST ENDPOINT =====================================================================================
 // POST /tasks)
 app.post('/tasks', (req, res) => {
   const { title } = req.body;
@@ -64,8 +64,45 @@ app.post('/tasks', (req, res) => {
   tasks.push(newTask);
   res.status(201).json(newTask);
 });
+// PUT ENDPOINT =====================================================================================
+// PUT /tasks/:id
+app.put('/tasks/:id', (req, res) => {
+  const taskId = parseInt(req.params.id);
+  const taskIndex = tasks.findIndex(t => t.id === taskId);
 
+  // 404 Not Found
+  if (taskIndex === -1) {
+    return res.status(404).json({ error: `Task ${taskId} not found` });
+  }
 
+  const { title, done } = req.body;
+
+  // 400 Invalid body
+  if (Object.keys(req.body).length === 0 || (title !== undefined && title.trim() === "")) {
+    return res.status(400).json({ error: "Invalid or empty body" });
+  }
+
+  if (title !== undefined) tasks[taskIndex].title = title;
+  if (done !== undefined) tasks[taskIndex].done = done;
+
+  res.json(tasks[taskIndex]);
+});
+
+// DELETE ENDPOINT =====================================================================================
+app.delete('/tasks/:id', (req, res) => {
+  const taskId = parseInt(req.params.id);
+  const taskIndex = tasks.findIndex(t => t.id === taskId);
+
+  // 404 Not Found
+  if (taskIndex === -1) {
+    return res.status(404).json({ error: `Task ${taskId} not found` });
+  }
+
+  tasks.splice(taskIndex, 1);
+
+  // 204 No Content or empty body [cite: 1]
+  res.status(204).send();
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
