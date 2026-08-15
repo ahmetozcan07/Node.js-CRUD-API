@@ -24,6 +24,7 @@ let tasks = [
   { id: 3, title: "Test with Swagger", done: false }
 ];
 
+// GET ENDPOINTS  =====================================================================================
 // GET /tasks
 app.get('/tasks', (req, res) => {
   res.json(tasks);
@@ -41,6 +42,30 @@ app.get('/tasks/:id', (req, res) => {
     res.status(404).json({ error: `Task ${taskId} not found` });
   }
 });
+
+// POST ENDPOINTS =====================================================================================
+// POST /tasks)
+app.post('/tasks', (req, res) => {
+  const { title } = req.body;
+
+  //  400 Bad Request
+  if (!title || title.trim() === "") {
+    return res.status(400).json({ error: "Title is required" });
+  }
+
+  const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+  const newTask = {
+    id: newId,
+    title: title,
+    done: false
+  };
+
+  // 201 Created
+  tasks.push(newTask);
+  res.status(201).json(newTask);
+});
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
