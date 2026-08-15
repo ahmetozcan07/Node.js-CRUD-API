@@ -54,19 +54,21 @@ let tasks = [
 // GET ENDPOINTS  =====================================================================================
 // GET /tasks
 app.get('/tasks', (req, res) => {
-  res.json(tasks);
+  const tasks = db.prepare('SELECT * FROM tasks').all();
+  const formattedTasks = tasks.map(t => ({ ...t, done: Boolean(t.done) }));
+  res.json(formattedTasks);
 });
 
 // GET /tasks/:id
 app.get('/tasks/:id', (req, res) => {
   const taskId = parseInt(req.params.id);
-  const task = tasks.find(t => t.id === taskId);
+  
+  const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(taskId);
 
   if (task) {
-    res.json(task);
+    res.json({ ...task, done: Boolean(task.done) });
   } else {
-    // 404 if no task is found with the given id
-    res.status(404).json({ error: `Task ${taskId} not found` });
+    res.status(404).json({ error: "Task not found" });
   }
 });
 
