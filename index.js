@@ -1,5 +1,6 @@
+require('dotenv').config();
 const express = require('express');
-const Database = require('better-sqlite3');
+const { Pool } = require('pg');
 
 const app = express();
 const port = 3000;
@@ -8,27 +9,33 @@ const swaggerUi = require('swagger-ui-express');
 const openapiDocument = require('./openapi.json');
 
 app.use(express.json());
-
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiDocument));
 
-const db = new Database('tasks.db');
-
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    done INTEGER NOT NULL DEFAULT 0
-  )
-`).run();
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL
+});
 
 // seed if table is empty
-const rowCount = db.prepare('SELECT COUNT(*) as count FROM tasks').get().count;
-if (rowCount === 0) {
-  const insert = db.prepare('INSERT INTO tasks (title, done) VALUES (?, ?)');
-  insert.run('Learn Node.js', 1);
-  insert.run('Build a CRUD API', 0);
-  insert.run('Test with Swagger', 0);
-}
+const initDB = async () => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id serial primary key,
+      title text,
+      done boolean
+    )
+  `);
+
+  const res = await pool.query('SELECT COUNT(*) as count FROM tasks');
+  if (parseInt(res.rows[0].count) === 0) {
+    const insertQuery = 'INSERT INTO tasks (title, done) VALUES ($1, $2)';
+    await pool.query(insertQuery, ['Learn Node.js', true]);
+    await pool.query(insertQuery, ['Build a CRUD API', false]);
+    await pool.query(insertQuery, ['Test with Swagger', false]);
+    console.log("Örnek görevler veritabanına eklendi.");
+  }
+};
+
+initDB();
 
 
 // Root Endpoint
