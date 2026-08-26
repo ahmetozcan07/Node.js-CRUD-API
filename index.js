@@ -58,24 +58,31 @@ let tasks = [
   { id: 3, title: "Test with Swagger", done: false }
 ];
 
-// GET ENDPOINTS  =====================================================================================
+// GET ENDPOINTS =====================================================================================
 // GET /tasks
-app.get('/tasks', (req, res) => {
-  const tasks = db.prepare('SELECT * FROM tasks').all();
-  const formattedTasks = tasks.map(t => ({ ...t, done: Boolean(t.done) }));
-  res.json(formattedTasks);
+app.get('/tasks', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM tasks');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // GET /tasks/:id
-app.get('/tasks/:id', (req, res) => {
+app.get('/tasks/:id', async (req, res) => {
   const taskId = parseInt(req.params.id);
   
-  const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(taskId);
+  try {
+    const result = await pool.query('SELECT * FROM tasks WHERE id = $1', [taskId]);
 
-  if (task) {
-    res.json({ ...task, done: Boolean(task.done) });
-  } else {
-    res.status(404).json({ error: "Task not found" });
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ error: "Task not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
