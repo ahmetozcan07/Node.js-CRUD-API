@@ -57,14 +57,14 @@ app.get('/health', (req, res) => {
   res.json({ "status": "ok" });
 });
 
-// PUBLIC & PROTECTED ENDPOINTS =======================================================================
+// PUBLIC ENDPOINT ====================================================================================
 // GET /public/info
 app.get('/public/info', (req, res) => {
   res.status(200).json({ message: "Welcome stranger! This info is public." });
 });
 
-// GET /protected/profile
-app.get('/protected/profile', async (req, res) => {
+// AUTH MIDDLEWARE  ===================================================================================
+const authGuard = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -83,11 +83,33 @@ app.get('/protected/profile', async (req, res) => {
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 
+  req.user = data.user;
+  
+  next();
+};
+
+// PROTECTED ENDPOINTS ================================================================================
+// GET /protected/profile
+app.get('/protected/profile', authGuard, (req, res) => {
   res.status(200).json({
-    id: data.user.id,
-    email: data.user.email,
-    created_at: data.user.created_at
+    id: req.user.id,
+    email: req.user.email,
+    created_at: req.user.created_at
   });
+});
+
+app.get('/protected/dashboard', authGuard, (req, res) => {
+  res.status(200).json({ 
+    message: "Welcome to your secure dashboard!", 
+    user: req.user.email 
+  });
+});
+
+// POST /auth/logout
+app.post('/auth/logout', authGuard, async (req, res) => {
+  await supabase.auth.signOut();
+  
+  res.status(204).send();
 });
 
 // AUTH ENDPOINTS =====================================================================================
