@@ -1,14 +1,17 @@
 # Basic Task CRUD API
 
-Basic in-memory to-do list CRUD API using Node.js and Express.js.
+Basic to-do list CRUD API using Node.js and Express.js, running on a real PostgreSQL database containerized with Docker.
 
 ## How to Install & Run 
 
-Use these commands to run this project:
+This project runs the entire stack (API + Database) with a single Docker command.
+
+1. First, create your environment file by copying the example provided:
+   `cp .env.example .env` (or manually copy the contents of `.env.example` into a new `.env` file).
+2. Start the application and the database together:
 
 ```bash
-npm install
-node index.js
+docker compose up
 ```
 ## Table of Endpoints
 
@@ -23,29 +26,21 @@ node index.js
 
 
 ## Example curl -i output
-D:\Users\ozcan\OneDrive\Masaüstü\Node.js\task api>curl -i -X PUT http://localhost:3000/tasks/1 -H "Content-Type: application/json" -d "{\"title\":\"Learn Node.js and Express\",\"done\":true}"
+D:\Users\ozcan\OneDrive\Masaüstü\Node.js>curl -i http://localhost:3000/tasks
 HTTP/1.1 200 OK
 X-Powered-By: Express
 Content-Type: application/json; charset=utf-8
-Content-Length: 56
-ETag: W/"38-9nDnx7T7dzHZSSxBXQHJDFbShJ0"
-Date: Sat, 15 Aug 2026 03:06:43 GMT
+Content-Length: 145
+ETag: W/"91-5Bg0CZvGxiY7yvf1cVLoygo7CBg"
+Date: Thu, 27 Aug 2026 00:11:19 GMT
 Connection: keep-alive
 Keep-Alive: timeout=5
 
-{"id":1,"title":"Learn Node.js and Express","done":true}
+[{"id":1,"title":"Learn Node.js","done":true},{"id":2,"title":"Build a CRUD API","done":false},{"id":3,"title":"Test with Swagger","done":false}]
 
 
 ## Swagger screenshot
 ![](./SwaggerScreenshot.png)
 
-## Why SQLite was choosen?
-- Everything lives in a local file (`tasks.db`).
-- No separate database server to install or configure.
-- Data survives server restarts, turning the app from a temporary demo into a real backend.
-
-## Database in DBBrowser
-![](./tasksTable.png)
-
-## Example SQL Query
-![](./DBBrowserSS.png)
+## PostgreSQL Database Proof
+![](./dockerScreenshot.png)
