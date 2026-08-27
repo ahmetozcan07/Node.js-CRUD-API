@@ -5,7 +5,100 @@
     "version": "1.0.0",
     "description": "A simple CRUD API for managing a to-do list."
   },
-  "paths": {
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {"/auth/signup": {
+      "post": {
+        "summary": "Create a new user account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "test@example.com" },
+                  "password": { "type": "string", "example": "password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" },
+          "400": { "description": "Bad Request" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate & return a JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "test@example.com" },
+                  "password": { "type": "string", "example": "password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" },
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "End the user's session",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "204": { "description": "No Content" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/public/info": {
+      "get": {
+        "summary": "Read public, open data",
+        "responses": {
+          "200": { "description": "Welcome stranger! This info is public." }
+        }
+      }
+    },
+    "/protected/profile": {
+      "get": {
+        "summary": "Read private profile data",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "OK" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/protected/dashboard": {
+      "get": {
+        "summary": "Secure dashboard view",
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "OK" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
     "/tasks": {
       "get": {
         "summary": "Get all tasks",
